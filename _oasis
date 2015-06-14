@@ -1,0 +1,16 @@
+# -*- conf -*-
+OASISFormat: 0.4
+Name:        tsdl-ttf
+Version:     0
+Synopsis:    SDL2_ttf bindings to go with Tsdl
+Authors:     Julian Squires
+License:     BSD-3-clause
+Plugins:     META (0.4)
+
+Library "tsdl_ttf"
+  Path:         src
+  Modules:      Tsdl_ttf
+  BuildDepends: ctypes, tsdl
+  BuildTools:   ocamlbuild
+  CCLib:        -lSDL2_ttf
+  XMETAEnable:  true

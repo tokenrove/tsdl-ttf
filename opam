@@ -1,0 +1,23 @@
+opam-version: "1"
+name: "tsdl-ttf"
+version: "0.1"
+maintainer: "Julian Squires <julian@cipht.net>"
+authors: ["Julian Squires <julian@cipht.net>"]
+homepage: "http://github.com/tokenrove/tsdl-ttf"
+dev-repo: "https://github.com/tokenrove/tsdl-ttf.git"
+bug-reports: "http://github.com/tokenrove/tsdl-ttf/issues"
+tags: [ "bindings" "graphics" ]
+license: "BSD3"
+depends: [
+  "ctypes" {>= "0.4.0"}
+  "ctypes-foreign"
+  "tsdl" {> "0.8.1"}
+  "oasis" {build}
+]
+build: [
+  [ "oasis" "setup" ]
+  [ "ocaml" "setup.ml" "-configure" ]
+  [ "ocaml" "setup.ml" "-build" ]
+]
+install: [[ "ocaml" "setup.ml" "-install" ]]
+remove: [["ocamlfind" "remove" "tsdl_ttf"]]
