@@ -4,6 +4,14 @@ open Tsdl
 
 module Ttf = struct
 
+type 'a result = [ `Ok of 'a | `Error of string ]
+
+let error () = `Error (Sdl.get_error ())
+
+let zero_to_ok =
+  let read = function 0 -> `Ok () | err -> error () in
+  view ~read ~write:(fun _ -> assert false) int
+
 let bool =
   let read = function 0 -> false | _ -> true in
   let write = function true -> 1 | false -> 0 in
@@ -28,7 +36,7 @@ let font_struct : _font structure typ = structure "TTF_Font"
 let font : _font structure ptr typ = ptr font_struct
 let font_opt : _font structure ptr option typ = ptr_opt font_struct
 
-let init = foreign "TTF_Init" (void @-> returning int)
+let init = foreign "TTF_Init" (void @-> returning zero_to_ok)
 
 let open_font = foreign "TTF_OpenFont" (string @-> int @-> returning font_opt)
 let open_font_index = foreign "TTF_OpenFontIndex" (string @-> int @-> long @-> returning font_opt)
@@ -94,6 +102,22 @@ let color_g = field color "g" uint8_t
 let color_b = field color "b" uint8_t
 let color_a = field color "a" uint8_t
 let () = seal color
+
+let color =
+  let read v =
+    let (r,g,b,a) = Unsigned.UInt8.(to_int @@ getf v color_r,
+                                    to_int @@ getf v color_g,
+                                    to_int @@ getf v color_b,
+                                    to_int @@ getf v color_a) in
+    Sdl.Color.create r g b a in
+  let write v =
+    let c = make color in
+    setf c color_r (Unsigned.UInt8.of_int (Sdl.Color.r v));
+    setf c color_g (Unsigned.UInt8.of_int (Sdl.Color.g v));
+    setf c color_b (Unsigned.UInt8.of_int (Sdl.Color.b v));
+    setf c color_a (Unsigned.UInt8.of_int (Sdl.Color.a v));
+    c
+  in view ~read ~write color
 
 let render_text_solid = foreign "TTF_RenderText_Solid" (font @-> string @-> color @-> returning surface_opt)
 let render_utf8_solid = foreign "TTF_RenderUTF8_Solid" (font @-> string @-> color @-> returning surface_opt)

@@ -14,3 +14,10 @@ Library "tsdl_ttf"
   BuildTools:   ocamlbuild
   CCLib:        -lSDL2_ttf
   XMETAEnable:  true
+
+Executable "show_string"
+  Install:      false
+  Path:         test
+  BuildTools:   ocamlbuild
+  BuildDepends: tsdl, tsdl_ttf, threads
+  MainIs:       show_string.ml
