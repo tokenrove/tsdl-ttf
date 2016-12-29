@@ -1,15 +1,16 @@
 open Ctypes
 open Foreign
 open Tsdl
+open Result
 
 module Ttf = struct
 
-type 'a result = [ `Ok of 'a | `Error of string ]
+type 'a result = 'a Sdl.result
 
-let error () = `Error (Sdl.get_error ())
+let error () = Error (`Msg (Sdl.get_error ()))
 
 let zero_to_ok =
-  let read = function 0 -> `Ok () | err -> error () in
+  let read = function 0 -> Ok () | err -> error () in
   view ~read ~write:(fun _ -> assert false) int
 
 let bool =
@@ -113,7 +114,7 @@ let glyph_metrics f g =
                                        allocate int 0)
   in
   if 0 = glyph_metrics f g min_x max_x min_y max_y advance then
-    `Ok GlyphMetrics.({ min_x = !@ min_x;
+    Ok GlyphMetrics.({ min_x = !@ min_x;
                         max_x = !@ max_x;
                         min_y = !@ min_y;
                         max_y = !@ max_y;
@@ -124,12 +125,12 @@ let glyph_metrics f g =
 let size_text = foreign "TTF_SizeText" (font @-> string @-> ptr int @-> ptr int @-> returning int)
 let size_text f s =
   let (w,h) = (allocate int 0, allocate int 0) in
-  if 0 = size_text f s w h then `Ok (!@ w, !@ h) else error ()
+  if 0 = size_text f s w h then Ok (!@ w, !@ h) else error ()
 
 let size_utf8 = foreign "TTF_SizeUTF8" (font @-> string @-> ptr int @-> ptr int @-> returning int)
 let size_utf8 f s =
   let (w,h) = (allocate int 0, allocate int 0) in
-  if 0 = size_utf8 f s w h then `Ok (!@ w, !@ h) else error ()
+  if 0 = size_utf8 f s w h then Ok (!@ w, !@ h) else error ()
 
 let size_unicode =
   foreign "TTF_SizeUNICODE" (font @-> ptr glyph_ucs2 @-> ptr int @-> ptr int @-> returning int)

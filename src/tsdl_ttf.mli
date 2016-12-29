@@ -9,9 +9,7 @@ module Ttf : sig
     {{:https://www.libsdl.org/projects/SDL_ttf/docs/index.html}SDL2_ttf API}
 *)
 
-type 'a result = [ `Ok of 'a | `Error of string ]
-(** The type for function results. In the [`Error] case,
-    the string is what {!Tsdl.Sdl.get_error} returned. *)
+type 'a result = 'a Tsdl.Sdl.result
 
 val init : unit -> unit result
 val quit : unit -> unit

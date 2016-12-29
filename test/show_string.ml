@@ -1,9 +1,10 @@
 open Tsdl
 open Tsdl_ttf
+open Result
 
 let (>>=) o f =
-  match o with | `Error e -> failwith (Printf.sprintf "Error %s" e)
-               | `Ok a -> f a
+  match o with | Error (`Msg e) -> failwith (Printf.sprintf "Error %s" e)
+               | Ok a -> f a
 
 let unwind ~(protect:'a -> unit) f x =
   try let y = f x in protect x; y
@@ -27,11 +28,11 @@ let () =
   let rec loop () =
     Sdl.fill_rect display None 0l >>= fun () ->
     let Some sface = Ttf.render_text_solid font "foobar" fg_color in
-    Sdl.blit_surface sface None display r >>= fun () ->
+    Sdl.blit_surface sface None display ( Some r ) >>= fun () ->
     Sdl.update_window_surface window >>= fun () ->
     match Sdl.wait_event (Some e) with
-    | `Error err -> Sdl.log "Could not wait event: %s" err; ()
-    | `Ok () ->
+    | Error (`Msg err) -> Sdl.log "Could not wait event: %s" err; ()
+    | Ok () ->
       match Sdl.Event.(enum (get e typ)) with
       | `Quit | `Key_down -> ()
       | _ -> loop ()
