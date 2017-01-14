@@ -108,17 +108,17 @@ end
 let glyph_metrics = foreign "TTF_GlyphMetrics" (font @-> glyph_ucs2 @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> returning int)
 let glyph_metrics f g =
   let (min_x,max_x,min_y,max_y,advance) = (allocate int 0,
-                                       allocate int 0,
-                                       allocate int 0,
-                                       allocate int 0,
-                                       allocate int 0)
+                                           allocate int 0,
+                                           allocate int 0,
+                                           allocate int 0,
+                                           allocate int 0)
   in
   if 0 = glyph_metrics f g min_x max_x min_y max_y advance then
     Ok GlyphMetrics.({ min_x = !@ min_x;
-                        max_x = !@ max_x;
-                        min_y = !@ min_y;
-                        max_y = !@ max_y;
-                        advance = !@ advance })
+                       max_x = !@ max_x;
+                       min_y = !@ min_y;
+                       max_y = !@ max_y;
+                       advance = !@ advance })
   else
     error ()
 
