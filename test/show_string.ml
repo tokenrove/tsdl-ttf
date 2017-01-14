@@ -14,8 +14,7 @@ let () =
   Sdl.init Sdl.Init.everything >>= fun () ->
   Ttf.init () >>= fun () ->
   assert (Ttf.was_init ());
-  let Some font = Ttf.open_font "f500.ttf" 72 in
-
+  Ttf.open_font "f500.ttf" 72 >>= fun (font) ->
   let display_width = 640 in
   let display_height = 480 in
   Sdl.create_window_and_renderer ~w:display_width ~h:display_height Sdl.Window.windowed
@@ -27,8 +26,8 @@ let () =
   let fg_color = Sdl.Color.create 255 255 255 255 in
   let rec loop () =
     Sdl.fill_rect display None 0l >>= fun () ->
-    let Some sface = Ttf.render_text_solid font "foobar" fg_color in
-    Sdl.blit_surface sface None display ( Some r ) >>= fun () ->
+    Ttf.render_text_solid font "foobar" fg_color >>= fun (sface) ->
+    Sdl.blit_surface sface None display (Some r) >>= fun () ->
     Sdl.update_window_surface window >>= fun () ->
     match Sdl.wait_event (Some e) with
     | Error (`Msg err) -> Sdl.log "Could not wait event: %s" err; ()

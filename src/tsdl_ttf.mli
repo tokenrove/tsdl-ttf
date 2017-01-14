@@ -18,10 +18,10 @@ val was_init : unit -> bool
 type font
 val close_font : font -> unit
 
-val open_font : string -> int -> font option
-val open_font_index : string -> int -> int64 -> font option
-val open_font_rw : Tsdl.Sdl.rw_ops -> int -> int -> font option
-val open_font_index_rw : Tsdl.Sdl.rw_ops -> int -> int -> int64 -> font option
+val open_font : string -> int -> font result
+val open_font_index : string -> int -> int64 -> font result
+val open_font_rw : Tsdl.Sdl.rw_ops -> int -> int -> font result
+val open_font_index_rw : Tsdl.Sdl.rw_ops -> int -> int -> int64 -> font result
 
 module Style : sig
   type t
@@ -69,26 +69,26 @@ val size_text : font -> string -> (int*int) result
 val size_utf8 : font -> string -> (int*int) result
 
 val render_text_solid :
-  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_utf8_solid :
-  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_glyph_solid :
-  font -> int -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> int -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_text_shaded :
-  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_utf8_shaded :
-  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_glyph_shaded :
-  font -> int -> Tsdl.Sdl.color -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> int -> Tsdl.Sdl.color -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_text_blended :
-  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_utf8_blended :
-  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 val render_text_blended_wrapped :
-  font -> string -> Tsdl.Sdl.color -> int32 -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> int32 -> Tsdl.Sdl.surface result
 val render_utf8_blended_wrapped :
-  font -> string -> Tsdl.Sdl.color -> int32 -> Tsdl.Sdl.surface option
+  font -> string -> Tsdl.Sdl.color -> int32 -> Tsdl.Sdl.surface result
 val render_glyph_blended :
-  font -> int -> Tsdl.Sdl.color -> Tsdl.Sdl.surface option
+  font -> int -> Tsdl.Sdl.color -> Tsdl.Sdl.surface result
 
 end

@@ -25,10 +25,16 @@ let int64_as_long =
 
 let surface =
   view ~read:Sdl.unsafe_surface_of_ptr ~write:Sdl.unsafe_ptr_of_surface nativeint
-let surface_opt =
-  let read v = if Nativeint.(compare v zero) = 0 then None else Some (Sdl.unsafe_surface_of_ptr v) in
-  let write = function | None -> raw_address_of_ptr @@ null | Some s -> Sdl.unsafe_ptr_of_surface s in
-  view ~read ~write nativeint
+let surface_result =
+  let read v =
+    if Nativeint.(compare v zero) = 0 then
+      error ()
+    else
+      Ok (Sdl.unsafe_surface_of_ptr v)
+  and write = function
+    | Error _ -> raw_address_of_ptr @@ null
+    | Ok s -> Sdl.unsafe_ptr_of_surface s
+  in view ~read ~write nativeint
 
 let rw_ops =
   view ~read:Sdl.unsafe_rw_ops_of_ptr ~write:Sdl.unsafe_ptr_of_rw_ops nativeint
@@ -38,18 +44,26 @@ type font = _font structure ptr
 let font_struct : _font structure typ = structure "TTF_Font"
 let font : _font structure ptr typ = ptr font_struct
 let font_opt : _font structure ptr option typ = ptr_opt font_struct
+let font_result =
+  let read = function
+    | None -> error ()
+    | Some v -> Ok v
+  and write = function
+    | Error _ -> None
+    | Ok s -> Some s
+  in view ~read ~write font_opt
 
 let init = foreign "TTF_Init" (void @-> returning zero_to_ok)
 
-let open_font = foreign "TTF_OpenFont" (string @-> int @-> returning font_opt)
+let open_font = foreign "TTF_OpenFont" (string @-> int @-> returning font_result)
 
 let open_font_index =
-  foreign "TTF_OpenFontIndex" (string @-> int @-> int64_as_long @-> returning font_opt)
+  foreign "TTF_OpenFontIndex" (string @-> int @-> int64_as_long @-> returning font_result)
 
-let open_font_rw = foreign "TTF_OpenFontRW" (rw_ops @-> int @-> int @-> returning font_opt)
+let open_font_rw = foreign "TTF_OpenFontRW" (rw_ops @-> int @-> int @-> returning font_result)
 
 let open_font_index_rw =
-  foreign "TTF_OpenFontIndexRW" (rw_ops @-> int @-> int @-> int64_as_long @-> returning font_opt)
+  foreign "TTF_OpenFontIndexRW" (rw_ops @-> int @-> int @-> int64_as_long @-> returning font_result)
 
 let byte_swapped_unicode =
   foreign "TTF_ByteSwappedUNICODE" (int @-> returning void)
@@ -160,27 +174,27 @@ let color =
     c
   in view ~read ~write color
 
-let render_text_solid = foreign "TTF_RenderText_Solid" (font @-> string @-> color @-> returning surface_opt)
-let render_utf8_solid = foreign "TTF_RenderUTF8_Solid" (font @-> string @-> color @-> returning surface_opt)
-let render_unicode_solid = foreign "TTF_RenderUNICODE_Solid" (font @-> ptr glyph_ucs2 @-> color @-> returning surface_opt)
+let render_text_solid = foreign "TTF_RenderText_Solid" (font @-> string @-> color @-> returning surface_result)
+let render_utf8_solid = foreign "TTF_RenderUTF8_Solid" (font @-> string @-> color @-> returning surface_result)
+let render_unicode_solid = foreign "TTF_RenderUNICODE_Solid" (font @-> ptr glyph_ucs2 @-> color @-> returning surface_result)
 
-let render_glyph_solid = foreign "TTF_RenderGlyph_Solid" (font @-> glyph_ucs2 @-> color @-> returning surface_opt)
+let render_glyph_solid = foreign "TTF_RenderGlyph_Solid" (font @-> glyph_ucs2 @-> color @-> returning surface_result)
 
-let render_text_shaded = foreign "TTF_RenderText_Shaded" (font @-> string @-> color @-> color @-> returning surface_opt)
-let render_utf8_shaded = foreign "TTF_RenderUTF8_Shaded" (font @-> string @-> color @-> color @-> returning surface_opt)
-let render_unicode_shaded = foreign "TTF_RenderUNICODE_Shaded" (font @-> ptr glyph_ucs2 @-> color @-> color @-> returning surface_opt)
+let render_text_shaded = foreign "TTF_RenderText_Shaded" (font @-> string @-> color @-> color @-> returning surface_result)
+let render_utf8_shaded = foreign "TTF_RenderUTF8_Shaded" (font @-> string @-> color @-> color @-> returning surface_result)
+let render_unicode_shaded = foreign "TTF_RenderUNICODE_Shaded" (font @-> ptr glyph_ucs2 @-> color @-> color @-> returning surface_result)
 
-let render_glyph_shaded = foreign "TTF_RenderGlyph_Shaded" (font @-> glyph_ucs2 @-> color @-> color @-> returning surface_opt)
+let render_glyph_shaded = foreign "TTF_RenderGlyph_Shaded" (font @-> glyph_ucs2 @-> color @-> color @-> returning surface_result)
 
-let render_text_blended = foreign "TTF_RenderText_Blended" (font @-> string @-> color @-> returning surface_opt)
-let render_utf8_blended = foreign "TTF_RenderUTF8_Blended" (font @-> string @-> color @-> returning surface_opt)
-let render_unicode_blended = foreign "TTF_RenderUNICODE_Blended" (font @-> ptr glyph_ucs2 @-> color @-> returning surface_opt)
+let render_text_blended = foreign "TTF_RenderText_Blended" (font @-> string @-> color @-> returning surface_result)
+let render_utf8_blended = foreign "TTF_RenderUTF8_Blended" (font @-> string @-> color @-> returning surface_result)
+let render_unicode_blended = foreign "TTF_RenderUNICODE_Blended" (font @-> ptr glyph_ucs2 @-> color @-> returning surface_result)
 
-let render_text_blended_wrapped = foreign "TTF_RenderText_Blended_Wrapped" (font @-> string @-> color @-> int32_as_uint32_t @-> returning surface_opt)
-let render_utf8_blended_wrapped = foreign "TTF_RenderUTF8_Blended_Wrapped" (font @-> string @-> color @-> int32_as_uint32_t @-> returning surface_opt)
-let render_unicode_blended_wrapped = foreign "TTF_RenderUNICODE_Blended_Wrapped" (font @-> ptr glyph_ucs2 @-> color @-> int32_as_uint32_t @-> returning surface_opt)
+let render_text_blended_wrapped = foreign "TTF_RenderText_Blended_Wrapped" (font @-> string @-> color @-> int32_as_uint32_t @-> returning surface_result)
+let render_utf8_blended_wrapped = foreign "TTF_RenderUTF8_Blended_Wrapped" (font @-> string @-> color @-> int32_as_uint32_t @-> returning surface_result)
+let render_unicode_blended_wrapped = foreign "TTF_RenderUNICODE_Blended_Wrapped" (font @-> ptr glyph_ucs2 @-> color @-> int32_as_uint32_t @-> returning surface_result)
 
-let render_glyph_blended = foreign "TTF_RenderGlyph_Blended" (font @-> glyph_ucs2 @-> color @-> returning surface_opt)
+let render_glyph_blended = foreign "TTF_RenderGlyph_Blended" (font @-> glyph_ucs2 @-> color @-> returning surface_result)
 
 let close_font = foreign "TTF_CloseFont" (font @-> returning void)
 
